@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Chip, Stack, Grid, Typography, Button, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Grid, Typography, Button, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import TopDrawer from '../components/TopDrawer';
-import DictionarySelect from './DictionarySelect';
+import { useDictionary } from '../utils/DictionaryContext';
 
-const Home = (props) => {
+
+const Home = () => {
   
-  
+  const { active} = useDictionary();
   const [wordAndDefinition, setWordAndDefinition] = useState(undefined);
 
   const getRandomWord = () => {
-    fetch(`https://1rnoszgn46.execute-api.us-east-1.amazonaws.com/random-word?tag=${props.activeDictionary.tags[0]}`
+    fetch(`https://1rnoszgn46.execute-api.us-east-1.amazonaws.com/random-word?tag=${active.tags[0]}`
     )
       .then((data) => data.json())
       .then((data) => setWordAndDefinition(data))
@@ -28,7 +28,6 @@ const Home = (props) => {
       display='flex'
     >
       <Grid item xs={12} >
-        <TopDrawer  />
       </Grid>
       <Grid
       

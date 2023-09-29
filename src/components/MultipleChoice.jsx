@@ -1,43 +1,93 @@
-import { multiChoiceUrl } from '../common/constants';
-import DictionarySelect from './DictionarySelect';
 import { useEffect, useState } from 'react';
-import { Button, Stack } from '@mui/material';
+import { Chip, Stack, Grid, Typography, Button, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { useDictionary } from '../utils/DictionaryContext';
 
-// const MultipleChoice = () => {
-//   return <div>Multiple Choice</div>;
-// };
+export default function MultiChoice() {
 
-export default function MultiChoice(props) {
- const [choices, setChoices] = useState([])
- const [answer, setAnswer] = useState(undefined);
+  const { active}  = useDictionary();
 
- useEffect(() => {
-  if(props.activeDictionary) {
-    fetch(`${multiChoiceUrl}?tag=${props.activeDictionary.tags[0]}`)
-    .then((data) => data.json())
-    .then((data) => {
-      console.log(data);
-      setChoices(data);
-    })
-    .catch((e) => console.log(e));
+
+  const [data, setData] = useState([]); // Initialize data state with an empty array
+  const [correctIndex, setCorrectIndex] = useState(-1)
+  const [clicked, setClicked] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
+
+  const getWords = () => {
+    fetch(`https://1rnoszgn46.execute-api.us-east-1.amazonaws.com/multichoice?tag=${active.tags[0]}`)
+      .then((data) => data.json())
+      .then((data) => {
+
+        setData(data)
+        const key = Math.floor(Math.random() * 3)
+        setCorrectIndex(key)
+        setSelectedIndex(-1)
+        setClicked(false)
+       
+      })
+
+  };
+
+
+  const definitionGame = (choice) => {
+   setClicked(true)
+   setSelectedIndex(choice)
+    if (choice === correctIndex) {
+      console.log('Winner')
+
+    } else {
+      console.log('Loser')
+    }
   }
- }, [props.activeDictionary]);
 
-const pickAnswer = () => {
-  let rand = Math.floor(Math.random() * 3);
-  setAnswer(choices[rand]);
-  console.log(answer);
-}
 
-const checkAnswer = () => {
+  return (
+    <Grid
+      container
+      //spacing={4}
+      direction="column"
+      justifyContent="space-between"
+      alignItems="center"
+      display='flex'
+    >
+      <Grid item xs={12} >
+      </Grid>
+      <Grid
+        container
+        //spacing={4}
+        direction="row"
+        justifyContent="flex-start"
+        alignItems="flex-start"
+      >
+        <Grid item xs={2}>
+        </Grid>
+        <Grid item xs={8}>
+          <Button onClick={getWords} variant='contained'>
+            Get Word List
+          </Button>
+          <Stack direction='column' spacing={1}>
 
-}
+            {data.map((d, index) => (
+              <Chip
+                label={d.word}
+                key={index}
 
- return (
-  <Stack direction="column" spacing={2}>
-    {choices &&
-    choices.map((d, index) => <Button key={index}>{d.definition}</Button>)}
-  </Stack>
- );
+                onClick={() => definitionGame(index)}
+
+              />
+            ))}
+          </Stack>
+
+          {correctIndex > -1 && <Chip
+            label={data[correctIndex].definition}
+          />}
+        {clicked && <Typography>
+          {selectedIndex === correctIndex ? "You got it!" : "Wrong!"
+          }
+        </Typography>}
+        </Grid>
+      </Grid>
+    </Grid>
+  )
 }
 

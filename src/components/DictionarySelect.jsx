@@ -1,40 +1,47 @@
-import { Chip, Stack} from '@mui/material';
-import { useEffect, useState } from 'react';
+import {
+  Chip,
+  Stack,
+} from '@mui/material';
+import { useDictionary } from '../utils/DictionaryContext';
+import { useEffect } from 'react';
 
-export default function DictionarySelect(props) {
 
-  const [selectedDictionary, setSelectedDictionary] = useState(undefined)
-  const [dictionaries, setDictionaries] = useState([]);
+function DictionarySelects() {
+  const { state, active, setActive, dispatch } = useDictionary();
 
   useEffect(() => {
-    fetch('https://1rnoszgn46.execute-api.us-east-1.amazonaws.com/dictionaries')
-      .then((data) => data.json())
-      .then((data) => {
-        setDictionaries(data);
-        if (data.length > 0) {
-          props.setActiveDictionary(data[0]);
-          setSelectedDictionary(data[0])
-        }
-      })
-      .catch((e) => console.log(e));
-  }, []);
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://1rnoszgn46.execute-api.us-east-1.amazonaws.com/dictionaries');
+        const data = await response.json();
+
+        dispatch(data);
+      } catch (error) {
+        console.error('Error fetching data', error);
+      }
+    };
+      fetchData();
+  }, [dispatch, setActive]);
+
 
   return (
     <div>
-      <Stack direction='column' spacing={1}>
-        {dictionaries &&
-          dictionaries.map((d, index) => (
+      <Stack direction='column'>
+        {state &&
+          state.map((d, index) => (
             <Chip
-            color={d._id === selectedDictionary._id ? "primary" : "secondary"}
-             label={d.title}
+              color={d._id !== active?._id ? "primary" : "secondary"}
+              label={d.title}
               key={index}
               onClick={() => {
-                setSelectedDictionary(d)
-                props.setActiveDictionary(d);
+                setActive(d);
+                const color = d._id !== active._id ? "primary" : "secondary"
               }}
             />
           ))}
       </Stack>
     </div>
   )
-};
+}
+
+export default DictionarySelects;
